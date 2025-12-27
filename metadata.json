@@ -1,0 +1,5 @@
+{
+  "name": " EasyOS",
+  "description": "A sophisticated system analyzer that evaluates your current hardware and provides AI-driven recommendations on the best operating system for your specific performance and battery needs.",
+  "requestFramePermissions": []
+}
