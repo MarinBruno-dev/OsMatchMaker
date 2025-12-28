@@ -21,7 +21,6 @@ export const getOsRecommendations = async (specs: SystemSpecs): Promise<Comparis
     - CPU Cores: ${specs.cores}
     - RAM (GB): ${specs.memory || '8 (Estimated)'}
     - Device Type: ${specs.isLaptop ? 'Laptop' : 'Desktop'}
-    - Current Battery Level: ${specs.batteryLevel ? Math.round(specs.batteryLevel * 100) + '%' : 'N/A'}
 
     User Profile:
     - Age: ${specs.userAge || 'Not specified'}
@@ -34,11 +33,13 @@ export const getOsRecommendations = async (specs: SystemSpecs): Promise<Comparis
     4. If you recommend 'Zorin OS Lite', you MUST use this exact download link: https://help.zorin.com/docs/getting-started/getting-zorin-os-lite/
     5. The tone should be friendly, enthusiastic, and fun—like a matchmaker.
     6. The first recommendation MUST be the absolute 'Top Pick'.
+    7. For each OS, generate 3 realistic and diverse 'reviews' from sources like Reddit, Social Media, Official Sites, or Tech Forums. These should reflect common user sentiments and use casual, realistic language. DO NOT include any usernames.
     
     For each OS:
     1. 'description': A friendly summary of the OS's personality.
     2. 'recommendationReason': A persuasive and fun explanation of why THIS user specifically will LOVE this choice given their age and experience.
     3. 'downloadUrl': The official URL to download the OS.
+    4. 'reviews': An array of objects with source, content (the review text), and an optional rating (1-5).
     
     Return the result in JSON format.
   `;
@@ -61,15 +62,26 @@ export const getOsRecommendations = async (specs: SystemSpecs): Promise<Comparis
                 osName: { type: Type.STRING },
                 overallScore: { type: Type.NUMBER },
                 performanceScore: { type: Type.NUMBER },
-                batteryScore: { type: Type.NUMBER },
                 description: { type: Type.STRING },
                 recommendationReason: { type: Type.STRING },
                 downloadUrl: { type: Type.STRING },
                 pros: { type: Type.ARRAY, items: { type: Type.STRING } },
                 cons: { type: Type.ARRAY, items: { type: Type.STRING } },
+                reviews: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: {
+                      source: { type: Type.STRING, description: "One of: Reddit, Social Media, Official Site, Tech Forum" },
+                      content: { type: Type.STRING },
+                      rating: { type: Type.NUMBER }
+                    },
+                    required: ["source", "content"]
+                  }
+                },
                 isTopPick: { type: Type.BOOLEAN }
               },
-              required: ["osName", "overallScore", "performanceScore", "batteryScore", "description", "recommendationReason", "downloadUrl", "pros", "cons"]
+              required: ["osName", "overallScore", "performanceScore", "description", "recommendationReason", "downloadUrl", "pros", "cons", "reviews"]
             }
           }
         },

@@ -4,6 +4,7 @@ import { SystemSpecs, ComparisonResult } from './types';
 import { getOsRecommendations } from './services/geminiService';
 import SystemInfoCard from './components/SystemInfoCard';
 import RecommendationView from './components/RecommendationView';
+import ChatBot from './components/ChatBot';
 
 const App: React.FC = () => {
   const [stage, setStage] = useState<'welcome' | 'questions' | 'loading' | 'results'>('welcome');
@@ -16,11 +17,29 @@ const App: React.FC = () => {
 
   const steps = [
     "Checking out your computer's personality...",
-    "Looking at your battery life...",
+    "Inspecting your hardware DNA...",
     "Measuring how fast your brain is...",
     "Chatting with Gemini about your options...",
     "Almost there! Picking your best match..."
   ];
+
+  const experienceDetails = {
+    beginner: {
+      emoji: '🌱',
+      label: 'Beginner',
+      desc: 'I want something easy, beautiful, and ready to use without any hassle.'
+    },
+    intermediate: {
+      emoji: '🛠️',
+      label: 'Intermediate',
+      desc: 'I enjoy tweaking settings and I am comfortable exploring new software.'
+    },
+    pro: {
+      emoji: '🧙‍♂️',
+      label: 'Pro',
+      desc: 'I know the terminal, fix my own problems, and want full customization control.'
+    }
+  };
 
   useEffect(() => {
     let interval: any;
@@ -42,21 +61,8 @@ const App: React.FC = () => {
       const platform = (navigator as any).userAgentData?.platform || navigator.platform;
       const cores = navigator.hardwareConcurrency || 2;
       let memory = (navigator as any).deviceMemory || 8; 
-      const isLaptop = /Mobi|Android|iPhone|iPad|Macintosh/.test(ua) || (navigator as any).getBattery !== undefined;
+      const isLaptop = /Mobi|Android|iPhone|iPad|Macintosh/.test(ua);
       
-      let batteryData = {};
-      if ('getBattery' in navigator) {
-        try {
-          const battery: any = await (navigator as any).getBattery();
-          batteryData = {
-            batteryLevel: battery.level,
-            isCharging: battery.charging
-          };
-        } catch (e) {
-          console.warn("Battery status access denied.");
-        }
-      }
-
       const detectedSpecs: SystemSpecs = {
         os: getOSName(ua),
         platform,
@@ -66,8 +72,7 @@ const App: React.FC = () => {
         screenResolution: `${window.screen.width}x${window.screen.height}`,
         isLaptop,
         userAge,
-        userExperience,
-        ...batteryData
+        userExperience
       };
 
       setSpecs(detectedSpecs);
@@ -90,19 +95,17 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-6 pt-16 pb-24">
+    <div className="max-w-[1400px] mx-auto px-4 md:px-8 pt-16 pb-24">
       <header className="text-center mb-16">
-        <div className="inline-block p-4 bg-white rounded-[2rem] shadow-xl shadow-pink-500/5 border border-pink-100 mb-6">
-          <div className="bg-gradient-to-br from-pink-400 to-indigo-500 p-3 rounded-2xl">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+        <div className="inline-block p-4 bg-white rounded-[2rem] shadow-xl shadow-emerald-500/5 border border-emerald-100 mb-6">
+          <div className="bg-gradient-to-br from-emerald-400 to-teal-500 p-3 rounded-2xl w-16 h-16 flex items-center justify-center">
+            <span className="text-3xl">💻</span>
           </div>
         </div>
-        <h1 className="text-6xl font-black tracking-tight text-slate-900 mb-4">
-          OS <span className="bg-gradient-to-r from-pink-500 to-indigo-600 bg-clip-text text-transparent">Matchmaker</span>
+        <h1 className="text-5xl md:text-7xl font-black tracking-tight text-slate-900 mb-4">
+          OS <span className="bg-gradient-to-r from-emerald-500 to-teal-600 bg-clip-text text-transparent">Matchmaker</span>
         </h1>
-        <p className="text-slate-500 text-xl max-w-xl mx-auto font-medium">
+        <p className="text-slate-500 text-lg md:text-xl max-w-2xl mx-auto font-medium">
           Let's find the perfect Operating System that fits your life and your computer! ✨
         </p>
       </header>
@@ -130,7 +133,7 @@ const App: React.FC = () => {
         )}
 
         {stage === 'questions' && (
-          <div className="max-w-2xl mx-auto bg-white p-12 rounded-[3rem] shadow-2xl shadow-indigo-500/10 border border-slate-100">
+          <div className="max-w-3xl mx-auto bg-white p-12 rounded-[3rem] shadow-2xl shadow-indigo-500/10 border border-slate-100">
             <h2 className="text-3xl font-black text-slate-900 mb-10 text-center">Getting to know you...</h2>
             
             <div className="space-y-12">
@@ -157,21 +160,32 @@ const App: React.FC = () => {
               {/* Experience Selector */}
               <div className="space-y-6">
                 <label className="text-sm font-black uppercase tracking-widest text-slate-400 block mb-4">Technical Wizardry Level</label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {(['beginner', 'intermediate', 'pro'] as const).map((level) => (
                     <button
                       key={level}
                       onClick={() => setUserExperience(level)}
-                      className={`p-6 rounded-[1.5rem] border-2 transition-all text-center flex flex-col items-center gap-2 ${
+                      className={`p-6 rounded-[2rem] border-2 transition-all text-center flex flex-col items-center gap-3 ${
                         userExperience === level 
-                        ? 'border-pink-500 bg-pink-50 text-pink-600' 
-                        : 'border-slate-100 hover:border-indigo-200 text-slate-500'
+                        ? 'border-emerald-500 bg-emerald-50/50 shadow-lg shadow-emerald-500/5' 
+                        : 'border-slate-100 hover:border-indigo-100 bg-slate-50/30'
                       }`}
                     >
-                      <span className="text-xl">
-                        {level === 'beginner' ? '🌱' : level === 'intermediate' ? '🛠️' : '🧙‍♂️'}
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl mb-2 ${
+                        userExperience === level ? 'bg-emerald-100' : 'bg-white shadow-sm'
+                      }`}>
+                        {experienceDetails[level].emoji}
+                      </div>
+                      <span className={`font-black uppercase text-xs tracking-widest ${
+                        userExperience === level ? 'text-emerald-600' : 'text-slate-500'
+                      }`}>
+                        {experienceDetails[level].label}
                       </span>
-                      <span className="font-black uppercase text-xs tracking-widest">{level}</span>
+                      <p className={`text-xs leading-relaxed font-medium ${
+                        userExperience === level ? 'text-emerald-500/80' : 'text-slate-400'
+                      }`}>
+                        {experienceDetails[level].desc}
+                      </p>
                     </button>
                   ))}
                 </div>
@@ -198,7 +212,7 @@ const App: React.FC = () => {
         )}
 
         {stage === 'results' && specs && result && (
-          <>
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="mb-12">
               <SystemInfoCard specs={specs} />
             </div>
@@ -211,7 +225,7 @@ const App: React.FC = () => {
                 ← Start Over
               </button>
             </div>
-          </>
+          </div>
         )}
       </main>
 
@@ -219,6 +233,9 @@ const App: React.FC = () => {
         <p>Made with 💖 and AI intelligence.</p>
         <p className="text-xs mt-2 uppercase tracking-[0.2em] font-bold">Privacy First • Secure • Fun</p>
       </footer>
+
+      {/* Persistent AI Chatbot */}
+      <ChatBot specs={specs} result={result} />
     </div>
   );
 };
